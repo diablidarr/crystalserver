@@ -18,13 +18,13 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    # Automatyczna instalacja i konfiguracja vcpkg z pamięcią podręczną (Cache)
+    # Poprawiona konfiguracja vcpkg ze stałym identyfikatorem SHA1
     - name: Setup vcpkg
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: 'latest'
+        vcpkgGitCommitId: '260d7cb0efb22a00940656f7ef5ebba2306bfda7'
 
-    # Wymuszenie instalacji bibliotek w trybie nieinteraktywnym przed uruchomieniem reszty skryptu
+    # Wymuszenie instalacji bibliotek w trybie nieinteraktywnym
     - name: Pre-install vcpkg dependencies
       run: |
         vcpkg install boost-system boost-asio boost-filesystem luajit openssl gmp mpfr libmariadb pthreads --triplet x64-windows
@@ -32,7 +32,6 @@ jobs:
 
     - name: Run Crystal Installer Script (Automated)
       run: |
-        # Wymuszamy, aby skrypt nie pytał o potwierdzenia (Bypass/Automate)
         $env:NONINTERACTIVE="true"
         .\crystal_windows_installer.ps1
       shell: powershell
