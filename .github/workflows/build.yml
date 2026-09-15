@@ -1,0 +1,35 @@
+name: Build Crystal Server
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch: # Pozwala na ręczne uruchomienie kompilacji kliknięciem
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Run Crystal Installer Script
+      run: |
+        .\crystal_windows_installer.ps1
+      shell: powershell
+
+    - name: Upload Compiled Server
+      uses: actions/upload-artifact@v4
+      with:
+        name: crystal-server-windows
+        path: |
+          build/
+          bin/
+          *.exe
