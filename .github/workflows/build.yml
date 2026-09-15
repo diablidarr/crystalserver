@@ -10,32 +10,31 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    # Pobranie kodu repozytorium (używamy najnowszej wersji v4)
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         submodules: recursive
 
+    # Konfiguracja MSBuild
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    # Poprawiona konfiguracja vcpkg ze stałym identyfikatorem SHA1
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: '260d7cb0efb22a00940656f7ef5ebba2306bfda7'
-
-    # Wymuszenie instalacji bibliotek w trybie nieinteraktywnym
+    # Instalacja bibliotek bezpośrednio przez wbudowane w system vcpkg
     - name: Pre-install vcpkg dependencies
       run: |
+        # Używamy wbudowanego w system vcpkg i wskazujemy mu domyślną ścieżkę instalacji
         vcpkg install boost-system boost-asio boost-filesystem luajit openssl gmp mpfr libmariadb pthreads --triplet x64-windows
       shell: powershell
 
+    # Uruchomienie skryptu instalacyjnego serwera Crystal
     - name: Run Crystal Installer Script (Automated)
       run: |
         $env:NONINTERACTIVE="true"
         .\crystal_windows_installer.ps1
       shell: powershell
 
+    # Zapisanie skompilowanych plików jako gotowy pakiet
     - name: Upload Compiled Server
       uses: actions/upload-artifact@v4
       with:
