@@ -3,9 +3,7 @@ name: Build Crystal Server
 on:
   push:
     branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
-  workflow_dispatch: # Pozwala na ręczne uruchomienie kompilacji kliknięciem
+  workflow_dispatch:
 
 jobs:
   build-windows:
@@ -20,8 +18,22 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Run Crystal Installer Script
+    # Automatyczna instalacja i konfiguracja vcpkg z pamięcią podręczną (Cache)
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'latest'
+
+    # Wymuszenie instalacji bibliotek w trybie nieinteraktywnym przed uruchomieniem reszty skryptu
+    - name: Pre-install vcpkg dependencies
       run: |
+        vcpkg install boost-system boost-asio boost-filesystem luajit openssl gmp mpfr libmariadb pthreads --triplet x64-windows
+      shell: powershell
+
+    - name: Run Crystal Installer Script (Automated)
+      run: |
+        # Wymuszamy, aby skrypt nie pytał o potwierdzenia (Bypass/Automate)
+        $env:NONINTERACTIVE="true"
         .\crystal_windows_installer.ps1
       shell: powershell
 
@@ -30,6 +42,5 @@ jobs:
       with:
         name: crystal-server-windows
         path: |
-          build/
-          bin/
-          *.exe
+          **/*.exe
+          **/*.dll
